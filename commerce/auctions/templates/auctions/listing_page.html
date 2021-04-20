@@ -1,0 +1,58 @@
+{% extends 'auctions/layout.html' %}
+
+{% block body %}
+    <h3>Listing: {{listing.title}}</h3>
+    {% if listing.watchlist == "YES" %}
+        <span class="watchlist">Watchlist</span>
+    {% endif %}
+
+    <div class="listing-page">
+        <ul>
+            {% if listing.photo %}
+                <li><img src="{{listing.photo.url}}"></li>
+            {% else %}
+                <li><img src="data:," alt="No Image yet!"></li>
+            {% endif %}
+            <li class="listing-item">Title: {{listing.title}}</li>
+            <li class="listing-item">Price: ${{listing.price}}</li>
+            <li >Active Listing: {{listing.active_listing}}</li>
+            <li class="listing-item">Watchlist: {{listing.watchlist}}</li>
+        </ul>
+        {% if user.is_authenticated %}
+            <form action="{% url 'bidding_adding_watchlist' listing_id=listing.id %}" method="POST">
+                {% csrf_token %}
+                <label for="bid">Starting bid: <strong>US ${{listing.starting_bid}}</strong></label><br>
+                {{bid_count}} bid(s) so far.<br>
+                <input type="number" name="bid" id="bid" 
+                    min="{{bidding_price}}" max="999999" step="0.01" 
+                    value="{{bidding_price}}" placeholder="Bid">
+                <br>
+                Enter US $ {{bidding_price}} or more<br>
+
+                <button class="btn btn-primary" name="placebid">Place bid</button><br>
+                watchlist_count : {{watchlist_count}}<br>
+                {% if watchlist_count == 0 %}
+                    <button class="btn btn-primary" name="add-watchlist">🤍 Add to Watchlist</button><br>
+                {% else %}
+                    <button class="btn btn-primary" name="remove-watchlist">💔 Remove from Watchlist</button>
+                {% endif %}
+            </form>
+        {% endif %}
+    </div>
+    <div>
+        <h3>Details</h3>
+        <ul>
+            <li class="listing-item">Listed by: {{listing.listed_by}}</li>
+            <li class="listing-item">Description: {{listing.description}}</li>
+            <li class="listing-item">Category: {{listing.catetory}}</li>
+            <li class="listing-datetime">Created {{listing.listing_datetime}}</li>
+        </ul>
+    </div>
+
+    <a href="{% url 'index' %}">Back to Active Listings</a>
+
+    {% if message %}
+        <li>{{message}}</li>
+    {% endif %}
+
+{% endblock %}
