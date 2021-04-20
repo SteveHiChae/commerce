@@ -112,9 +112,9 @@ def create_listing(request):
 
 def listing_page(request, listing_id):
     listing = Listing.objects.get(pk=listing_id)
-    bidding_price = listing.starting_bid + decimal.Decimal('0.1')
-    num_bidders = Bid.objects.filter(item=listing)
-    max_price = Bid.objects.filter(item=listing).order_by('-price').first()
+    bidding_price = listing.starting_bid + decimal.Decimal('0.1') # ned to remove
+    bid_count = Bid.objects.filter(item=listing).count()
+    highest_price = Bid.objects.filter(item=listing).order_by('-price').first()
 
     if request.user.is_authenticated:
         user = User.objects.get(pk=request.user.id)
