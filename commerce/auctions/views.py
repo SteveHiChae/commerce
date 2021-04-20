@@ -113,32 +113,29 @@ def create_listing(request):
 def listing_page(request, listing_id):
     listing = Listing.objects.get(pk=listing_id)
     bidding_price = listing.starting_bid + decimal.Decimal('0.1') # ned to remove
-    bid_count = Bid.objects.filter(item=listing).count()
-    highest_price = Bid.objects.filter(item=listing).order_by('-price').first()
+
+    number_of_bidding = Bid.objects.filter(item=listing).count()
+    if number_of_bidding == 0:
+        highest_price = listing.starting_bid
+    else:
+        highest_price = Bid.objects.filter(item=listing).order_by('-price').first()
 
     if request.user.is_authenticated:
         user = User.objects.get(pk=request.user.id)
         watchlist_count = Watchlist.objects.filter(watcher=user.id, item=listing).count()
-        bid_count = Bid.objects.filter(item=listing).count()
-        if bid_count > 1:
-            bid_max = Bid.objects.filter(item=listing).order_by('-price').first()
-            bid_tie = Bid.objects.filter(item=listing, price=bid_max.price)
-            # highest bidders => bid_tie[].bidder
-            # if bid_tie.count() > 1:
-                # handle who is who
-            # compare request.user.username with bid_tie[].bidder ??
-            # if request.user.username == bid_max.bidder:
-                # You're the the current bidder, highest bidder
-        else:
-            bid_max = 0
-            bid_tie = ""
+        if number_of_bidding > 1:
+            if highest_price.bidder == request.user.username:
+                current_bidder = 'Current bid is your.'
+            else:
+                current_bidder = 'Current bid is ' + highest_price.bidder + "'." 
 
         return render(request, "auctions/listing_page.html", {
             "listing": listing,
             "bidding_price": bidding_price,
             "watchlist_count": watchlist_count,
-            "bid_count": bid_count,
-            "bid_max": bid_max
+            "number_of_bidding": number_of_bidding,
+            "highest_price": highest_price,
+            "highest_bidder": highest_bidder
         })
 
     else:
